@@ -16,6 +16,7 @@ async function handleSearchResults(req, res) {
             $or: [
                 { title: { $regex: regex } },
                 { description: { $regex: regex } },
+                { productPrice: { $eq: Number(search) } },
             ]
         };
 

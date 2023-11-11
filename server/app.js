@@ -4,15 +4,8 @@ const cors = require('cors');
 // Creating express app
 const app = express();
 
-
 // Setting up port
 const port = process.env.PORT || 8000;
-
-// Import your router and other necessary modules
-const transactionsRouter = require('./routes/transactions');
-
-// Mount the router
-app.use('/', transactionsRouter);
 
 
 // Middleware to handle json parsing and url encoding
@@ -22,6 +15,13 @@ app.use(express.urlencoded({ extended: true }));
 
 // Middleware for CORS
 app.use(cors());
+
+
+// Import your router and other necessary modules
+const transactionsRouter = require('./routes/transactions');
+
+// Mount the router
+app.use('/', transactionsRouter);
 
 
 // Middleware to handle requests for non-existent routes

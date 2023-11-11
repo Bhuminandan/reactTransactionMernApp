@@ -4,14 +4,13 @@ import axios from 'axios'
 
 export const fetchTransactions = createAsyncThunk(
     'transactions/fetchTransactions',
-    async (pageNum = 1) => {
+    async (pageNum = 1, searchedTerm) => {
 
-        console.log(pageNum,);
-        console.log(`http://localhost:8000/find?page=${pageNum}&search=for`);
         try {
-            const res = await axios.get(`http://localhost:8000/find?page=1&search=for`)
-            console.log(res.data);
-            return res.data
+            const res = await axios.get(`http://localhost:8000/find?page=${pageNum}&search=${searchedTerm}`);
+            const data = res.data;
+            console.log(data);
+            return data
         } catch (error) {
             console.log(error)
         }

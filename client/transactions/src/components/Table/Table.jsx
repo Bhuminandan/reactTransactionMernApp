@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { monthData } from "../../data";
 import { fetchTransactions } from "../../redux/features/transactionsSlice";
@@ -8,22 +8,44 @@ const Table = () => {
 
   const [searchedTerm, setSearchedTerm] = useState("for")
   const [selecetdMonth, setSelectedMonth] = useState("january")
-  const [filteredData, setFilteredData] = useState([])
+  const [currentPage, setCurrentPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(6)
+  const [isPreviousDisabled, setIsPreviousDisabled] = useState(false)
+  const [isNextDisabled, setIsNextDisabled] = useState(false)
 
   const data = useSelector((state) => state.transactions.transactions);
   const dispatch = useDispatch();
 
+
   useEffect(() => {
+    dispatch(fetchTransactions(currentPage, searchedTerm))
+  }, [dispatch, searchedTerm, currentPage])
 
-    console.log(searchedTerm);
-    dispatch(fetchTransactions())
 
-  }, [data, dispatch, searchedTerm])
 
+  const handlePageClick = (e) => {
+    if (e.target.value <= 1) {
+      setCurrentPage(e.target.value)
+      setIsPreviousDisabled(true)
+      return;
+    }
+    
+    if (e.target.value >= totalPages) {
+      setCurrentPage(e.target.value)
+      setIsNextDisabled(true)
+      return;
+    }
+
+    if (isNextDisabled || isPreviousDisabled) {
+      setIsNextDisabled(false)
+      setIsPreviousDisabled(false) 
+    }
+    setCurrentPage(e.target.value)
+  }
 
 
   return (
-    <div className="bg-zinc-950 border rounded-2xl py-5 shadow-xl shadow-zinc-500 m-auto w-4/5 h-full px-10">
+    <div className="bg-zinc-950 border rounded-2xl py-5 shadow-xl shadow-zinc-500 m-auto w-4/5 min-h-screen px-10">
       <div className="flex justify-between w-full py-5">
         <div>
           <input 
@@ -63,7 +85,7 @@ const Table = () => {
         </thead>
         <tbody className="text-slate-200 p-4">
           {
-            filteredData.length !== 0 && filteredData.map((transaction) => {
+            data && data.map((transaction) => {
               return (
                 <tr key={transaction.id} className="p-4 text-start">
                   <td className="border-2 border-zinc-700 p-4 text-xl font-bold">{transaction.id}</td>
@@ -85,6 +107,42 @@ const Table = () => {
           }
         </tbody>
       </table>
+      <div className="w-full my-20">
+        <ul className="flex justify-center gap-5 py-2 px-4 bg-slate-500 rounded-2xl">
+
+            {
+              !isPreviousDisabled && (
+              <li 
+              className={`rounded-full px-4 py-2 active:translate-y-1 duration-300 hover:bg-gray-600 cursor-pointer font-bold text-slate-200`}
+              onClick={handlePageClick}
+              value={currentPage - 1}
+              >  
+              {'<'}
+            </li>
+              )
+            }
+          {
+            Array.from({ length: totalPages }, (_, index) => (
+              <li 
+              className={`rounded-full px-4 py-2 active:translate-y-1 duration-300 hover:bg-gray-600 cursor-pointer font-bold text-slate-200 ${index + 1 === currentPage ? "bg-slate-700" : "bg-slate-500"} `}
+              onClick={handlePageClick}
+              key={index} value={index + 1}>{index + 1}</li>
+            ))
+          }
+
+            {
+              !isNextDisabled && (
+                <li 
+                className={`rounded-full px-4 py-2 active:translate-y-1 duration-300 hover:bg-gray-600 cursor-pointer font-bold text-slate-200`}
+                onClick={handlePageClick}
+                value={currentPage + 1}
+                >  
+                {'>'}
+              </li>
+              )
+            }
+        </ul>
+      </div>
     </div>
   )
 }

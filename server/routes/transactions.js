@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const handleSearchResults = require('../controllers/tableDataController').handleSearchResults;
-const handleGetStistics = require('../controllers/statisticsDataController').handleGetStatistics
+const handleGetStistics = require('../controllers/statisticsDataController').handleGetStistics
 
 const Transaction = require('../models/transactionsModel');
 const transactionsController = require('../controllers/transactionsController');
