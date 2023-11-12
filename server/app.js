@@ -13,11 +13,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Middleware for CORS
-app.use(cors({
-    origin: ["https://react-transaction-mern-app-gbff.vercel.app"],
-    methods: ["GET", "POST"],
-    credentials: true
-}));
+app.use(cors());
 
 
 // Import your router and other necessary modules
