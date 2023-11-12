@@ -13,7 +13,10 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Middleware for CORS
-app.use(cors());
+app.use(cors({
+    origin: ["https://react-transaction-mern-app-gbff.vercel.app"],
+    methods: ["POST", "GET"],
+}));
 
 // Import your router and other necessary modules
 const transactionsRouter = require('./routes/transactions');
