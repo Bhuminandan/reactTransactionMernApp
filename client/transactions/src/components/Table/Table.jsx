@@ -1,3 +1,4 @@
+// Import nessary dependencies
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { monthData } from "../../data";
@@ -15,26 +16,33 @@ const debouncedFetch = debounce((dispatch, currentPage, searchedTerm) => {
 
 const Table = () => {
 
+  // Define state variables
   const [searchedTerm, setSearchedTerm] = useState("")
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(6)
   const [isPreviousDisabled, setIsPreviousDisabled] = useState(false)
   const [isNextDisabled, setIsNextDisabled] = useState(false)
 
+  // Get the transactions data from the Redux store
   const transactionsData = useSelector((state) => state.transactions)
   const { transactions, isLoading, error } = transactionsData || {};
   const {totalItemsFound, filteredData} = transactions || {};
 
+  // Get the current month from the Redux store
   const dispatch = useDispatch();
   const { monthIndex} = useSelector((state) => state.currentMonth.currentMonth);
 
+  // Fetch transactions on component mount
   useEffect(() => {
     debouncedFetch(dispatch, currentPage, searchedTerm)
     setTotalPages(Math.ceil(totalItemsFound / 10))
-  }, [dispatch, currentPage, searchedTerm, totalItemsFound])
+  }, [dispatch, currentPage, searchedTerm])
 
 
+  // Handle month selection
   const handleSelectedMonth = (e) => {
+
+    // Get the selected month name and index
     const selectedMonthName = e.target.value;
     const selectedMonthIndex = e.target.options[e.target.selectedIndex].dataset.index;
   
@@ -43,6 +51,7 @@ const Table = () => {
   
   };
 
+  // Handle page change
   const handlePageClick = (e) => {
     if (e.target.value <= 1) {
       setCurrentPage(e.target.value)
@@ -63,6 +72,7 @@ const Table = () => {
     setCurrentPage(e.target.value)
   }
 
+  // Handling if the data is loading
   if (isLoading) {
     return (
       <div className="w-screen h-screen flex items-center justify-center">
@@ -71,6 +81,7 @@ const Table = () => {
     )
   }
 
+  // Handling if there is an error
   if(error) {
     return (
       <div>
@@ -79,9 +90,15 @@ const Table = () => {
     )
   }
 
+  // Render the table
  return (
-  <div className="bg-zinc-950 border rounded-2xl py-5 shadow-xl shadow-zinc-500 m-auto w-4/5 min-h-screen px-10">
-    <div className="flex justify-between w-full py-5">
+  <div className="bg-zinc-950 border rounded-2xl py-5 shadow-xl shadow-zinc-500 m-auto max-w-[1050px] min-h-screen px-10  overflow-x-scroll">
+
+
+    {/* Search bar and month selection div */}
+    <div className="flex flex-wrap gap-5 justify-between w-full py-5">
+
+      {/* Search Bar */}
       <div>
         <input 
         type="text"
@@ -91,6 +108,8 @@ const Table = () => {
         value={searchedTerm}
         />
       </div>
+
+      {/* Month Selection */}
       <div>
         <select 
         value={monthData[monthIndex-1].month}
@@ -109,9 +128,16 @@ const Table = () => {
           }
         </select>
       </div>
+
     </div>
-    <table className="w-full text-slate-500  overflow-x-scroll ">
+
+    {/* Table */}
+    <table className="w-full text-slate-500">
+
+      {/* Table Header */}
       <thead>
+
+        {/* Table Row */}
         <tr className="overflow-hidden text-slate-800 uppercase hover:bg-slate-300 duration-300 ">
           <th className=" bg-slate-200 px-4 py-2 hover:bg-slate-300 rounded-tl-md duration-300 ">Id</th>
           <th className="bg-slate-200 px-4 py-2 hover:bg-slate-300 duration-300 ">Title</th>
@@ -121,15 +147,23 @@ const Table = () => {
           <th className="bg-slate-200 px-4 py-2 hover:bg-slate-300 duration-300 ">Sold</th>
           <th className=" hover:bg-slate-300 duration-300 rounded-tr-md bg-slate-200 px-4 py-2">Image</th>
         </tr>
+
       </thead>
+
+      {/* Table Body */}
       <tbody className="text-slate-200 p-4">
+
         {
           filteredData?.length === 0 ?
           
+          // Display a message if no data is found
           <div className="flex items-center justify-center w-full mt-10">
-            <p className="md:text-3xl text-xl font-semibold text-slate-500">No data found, Try searching for something else...</p>
+            <p className="md:text-xl text-md font-semibold text-slate-500">No data found, Try searching for something else...</p>
           </div>
+
           :
+
+          // Mapping the data to create rows
           filteredData?.map((transaction) => {
             return (
               <tr key={nanoid()} className="p-4 text-start">
@@ -150,12 +184,18 @@ const Table = () => {
             )
           })
         }
+
+
       </tbody>
+
     </table>
+
+    {/* Pagination */}
     <div className="w-full my-20">
       <ul className="flex justify-center gap-5 py-2 px-4 bg-slate-500 rounded-2xl">
 
           {
+            // Disable previous button if currentPage is 1
             !isPreviousDisabled && (
             <li 
             className={`rounded-full px-4 py-2 active:translate-y-1 duration-300 hover:bg-gray-600 cursor-pointer font-bold text-slate-200`}
@@ -167,15 +207,20 @@ const Table = () => {
             )
           }
         {
+
+          // Create pagination buttons
           Array.from({ length: totalPages }, (_, index) => (
             <li 
             className={`rounded-full px-4 py-2 active:translate-y-1 duration-300 hover:bg-gray-600 cursor-pointer font-bold text-slate-200 ${index + 1 === currentPage ? "bg-slate-700" : "bg-slate-500"} `}
             onClick={handlePageClick}
             key={index} value={index + 1}>{index + 1}</li>
           ))
+
         }
 
           {
+
+            // Disable next button if currentPage is totalPages
             !isNextDisabled && (
               <li 
               className={`rounded-full px-4 py-2 active:translate-y-1 duration-300 hover:bg-gray-600 cursor-pointer font-bold text-slate-200`}
@@ -188,6 +233,8 @@ const Table = () => {
           }
       </ul>
     </div>
+
+
   </div>
 )
 }

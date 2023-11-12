@@ -8,7 +8,7 @@ import BarChart from './components/BarChart/BarChart';
 
 function App() {
   return (
-    <div className='w-sceen min-h-screen'>
+    <div className='w-sceen min-h-screen overflow-x-hidden'>
       {/* Define the routes using React Router */}
       <Routes>
         {/* Route for the root path */}
