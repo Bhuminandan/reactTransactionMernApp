@@ -8,7 +8,7 @@ const fetchBarChartData = createAsyncThunk(
     async ({ monthIndex }) => {
         try {
             // Fetch bar chart data from the API based on the provided monthIndex
-            const res = await axios.get(`http://localhost:8000/barchart?month=${monthIndex}`);
+            const res = await axios.get(`https://react-transaction-mern-app.vercel.app/barchart?month=${monthIndex}`);
             const data = res.data;
             return data;
         } catch (error) {
