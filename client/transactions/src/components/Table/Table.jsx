@@ -1,27 +1,47 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { monthData } from "../../data";
 import { fetchTransactions } from "../../redux/features/transactionsSlice";
+import { nanoid } from "@reduxjs/toolkit";
+import debounce from "../utils/debounce";
+import Loader from "../Loaders/Loader";
+import { setCurrentMonth } from "../../redux/features/currentMonthSlice";
 
+
+// Debouncing the fetch
+const debouncedFetch = debounce((dispatch, currentPage, searchedTerm) => {
+  dispatch(fetchTransactions({ currentPage, searchedTerm }));
+}, 1000);
 
 const Table = () => {
 
-  const [searchedTerm, setSearchedTerm] = useState("for")
-  const [selecetdMonth, setSelectedMonth] = useState("january")
+  const [searchedTerm, setSearchedTerm] = useState("")
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(6)
   const [isPreviousDisabled, setIsPreviousDisabled] = useState(false)
   const [isNextDisabled, setIsNextDisabled] = useState(false)
 
-  const data = useSelector((state) => state.transactions.transactions);
-  const dispatch = useDispatch();
+  const transactionsData = useSelector((state) => state.transactions)
+  const { transactions, isLoading, error } = transactionsData;
+  const {totalItemsFound, filteredData} = transactions;
 
+  const dispatch = useDispatch();
+  const { monthIndex, month} = useSelector((state) => state.currentMonth.currentMonth);
 
   useEffect(() => {
-    dispatch(fetchTransactions(currentPage, searchedTerm))
-  }, [dispatch, searchedTerm, currentPage])
+    debouncedFetch(dispatch, currentPage, searchedTerm)
+    setTotalPages(Math.ceil(totalItemsFound / 10))
+  }, [dispatch, currentPage, searchedTerm, totalItemsFound])
 
 
+  const handleSelectedMonth = (e) => {
+    const selectedMonthName = e.target.value;
+    const selectedMonthIndex = e.target.options[e.target.selectedIndex].dataset.index;
+  
+    // Dispatch the action with the selected month information
+    dispatch(setCurrentMonth({ month: selectedMonthName, monthIndex: selectedMonthIndex }));
+  
+  };
 
   const handlePageClick = (e) => {
     if (e.target.value <= 1) {
@@ -43,6 +63,21 @@ const Table = () => {
     setCurrentPage(e.target.value)
   }
 
+  if (isLoading) {
+    return (
+      <div className="w-screen h-screen flex items-center justify-center">
+        <Loader/>
+      </div>
+    )
+  }
+
+  if(error) {
+    return (
+      <div>
+        {error}
+      </div>
+    )
+  }
 
   return (
     <div className="bg-zinc-950 border rounded-2xl py-5 shadow-xl shadow-zinc-500 m-auto w-4/5 min-h-screen px-10">
@@ -57,12 +92,16 @@ const Table = () => {
           />
         </div>
         <div>
-          <select name="month" id="month" className="border outline-none py-2 px-2 rounded-lg cursor-pointer bg-slate-200">
-            <option value="">Select Month</option>
+          <select 
+          value={monthData[monthIndex-1].month}
+          onChange={handleSelectedMonth}
+          name="month" id="month" className="border outline-none py-2 px-2 rounded-lg cursor-pointer bg-slate-200">
+
             {
-              monthData.map((month, index) => {
+              monthData.map(({ monthIndex, month }, index) => {
                 return (
-                  <option key={index} value={month}>
+                  <option key={index} value={month} data-index={monthIndex}
+                  >
                     {month}
                   </option>
                 )
@@ -85,9 +124,15 @@ const Table = () => {
         </thead>
         <tbody className="text-slate-200 p-4">
           {
-            data && data.map((transaction) => {
+            filteredData?.length === 0 ?
+            
+            <div className="flex items-center justify-center w-full mt-10">
+              <p className="md:text-3xl text-xl font-semibold text-slate-500">No data found, Try searching for something else...</p>
+            </div>
+            :
+            filteredData?.map((transaction) => {
               return (
-                <tr key={transaction.id} className="p-4 text-start">
+                <tr key={nanoid()} className="p-4 text-start">
                   <td className="border-2 border-zinc-700 p-4 text-xl font-bold">{transaction.id}</td>
                   <td className="border-2 border-zinc-700 p-4 font-semibold w-56">{transaction.title}</td>
                   <td className="border-2 border-zinc-700 p-4 text-xs">{transaction.description}</td>

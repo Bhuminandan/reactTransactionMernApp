@@ -3,7 +3,9 @@ const Transaction = require('../models/transactionsModel');
 async function handleSearchResults(req, res) {
     try {
         const { page, search } = req.query;
-        const itemsPerPage = 10; // Adjust this based on your desired number of items per page
+
+        // Define the number of items per page
+        const itemsPerPage = 10;
 
         // Convert page number to skip value
         const skip = (page - 1) * itemsPerPage;
@@ -12,24 +14,39 @@ async function handleSearchResults(req, res) {
         const regex = new RegExp(search, 'i');
 
         // Use $or to match any of the specified conditions
-        let query = {
-            $or: [
-                { title: { $regex: regex } },
-                { description: { $regex: regex } },
-                { productPrice: { $eq: Number(search) } },
-            ]
-        };
+        let query;
+        if (search) {
+            query = {
+                $or: [
+                    { title: { $regex: regex } },
+                    { description: { $regex: regex } },
+                    { productPrice: { $eq: Number(search) } },
+                ]
+            };
+        } else {
+            query = {};
+        }
 
         // Apply skip and limit separately
-        let filteredData = Transaction.find(query);
+        let filteredData;
+        if (search) {
+            // If search term is provided, apply the search query
+            filteredData = await Transaction.find(query)
+                .skip(skip)
+                .limit(itemsPerPage)
+                .exec();
+        } else {
+            // If no search term is provided, return the first 10 results from the entire database
+            filteredData = await Transaction.find({})
+                .skip(skip)
+                .limit(itemsPerPage)
+                .exec();
+        }
 
-        filteredData = filteredData.skip(skip);
-        filteredData = filteredData.limit(itemsPerPage);
+        // Get the total count of items found with the search query
+        const totalItemsFound = await Transaction.countDocuments(query);
 
-        // Execute the query
-        filteredData = await filteredData.exec();
-
-        res.json(filteredData);
+        res.json({ totalItemsFound, filteredData });
     } catch (error) {
         console.log('Error in searching API', error);
         res.status(500).json({ error: 'Internal Server Error' });

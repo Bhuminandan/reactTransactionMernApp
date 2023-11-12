@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const handleSearchResults = require('../controllers/tableDataController').handleSearchResults;
 const handleGetStistics = require('../controllers/statisticsDataController').handleGetStistics
+const handleGetChartData = require('../controllers/chartDataController').handleGetChartData;
 
 const Transaction = require('../models/transactionsModel');
 const transactionsController = require('../controllers/transactionsController');
@@ -13,11 +14,15 @@ router.get('/', async (req, res) => {
 });
 
 
+// API to handle search and initial render
 router.get('/find', handleSearchResults)
 
 
 // API for getting statistics
-router.get('/statistics/:month', handleGetStistics);
+router.get('/statistics', handleGetStistics);
+
+// API to get Chart Data
+router.get('/barchart', handleGetChartData)
 
 
 // Retrieve and send all transactions from the database

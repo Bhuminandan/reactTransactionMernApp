@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
-import { useSelector } from "react-redux"
+import { useDispatch, useSelector } from "react-redux"
 import { ResponsiveContainer, BarChart as ReBarChart , Bar, XAxis, YAxis, Tooltip } from 'recharts'
+import { fetchBarChartData } from "../../redux/features/chartDataSlice"
 
 const BarChart = () => {
 
@@ -59,6 +60,17 @@ const BarChart = () => {
     }
   ])
 
+  const dispatch = useDispatch()
+  const { monthIndex, month } = useSelector((state) => state.currentMonth.currentMonth)
+  const { isLoading, error, chartData : data } = useSelector((state) => state.chartData)
+
+
+  console.log(data);
+
+  useEffect(() => {
+    dispatch(fetchBarChartData({ monthIndex }))
+  }, [monthIndex, dispatch])
+
 
 
 
@@ -67,7 +79,7 @@ const BarChart = () => {
   return (
     <div className="w-screen min-h-screen bg-zinc-900 text-green-50 flex items-center justify-start gap-5">
       <div className="w-1/2 m-auto flex flex-col items-start justify-start gap-5">
-      <h1 className="text-xl font-bold text-slate-600">Transactions for : <span className="text-2xl font-bold text-slate-400">January</span></h1>
+      <h1 className="text-xl font-bold text-slate-600">Transactions for : <span className="text-2xl font-bold text-slate-400">{month}</span></h1>
       <div className="w-full m-auto bg-zinc-950 p-20 rounded-3xl">
       <ResponsiveContainer width={500} height={300}>
         <ReBarChart
