@@ -9,7 +9,7 @@ const fetchStatistics = createAsyncThunk(
         console.log(monthIndex);
         try {
             // Fetch statistics data from the API based on the provided monthIndex
-            const res = await axios.get(`http://localhost:8000/statistics?month=${monthIndex}`);
+            const res = await axios.get(`https://react-transaction-mern-app.vercel.app/statistics?month=${monthIndex}`);
             const data = res.data;
             console.log(data);
             return data;
