@@ -10,7 +10,7 @@ export const fetchTransactions = createAsyncThunk(
         console.log(currentPage, searchedTerm);
         try {
             // Fetch transactions data from the API based on the provided currentPage and searchedTerm
-            const res = await axios.get(`http://localhost:8000/find?page=${currentPage}&search=${searchedTerm}`);
+            const res = await axios.get(`https://react-transaction-mern-app.vercel.app/find?page=${currentPage}&search=${searchedTerm}`);
             const data = res.data;
             console.log(data);
             return data;
