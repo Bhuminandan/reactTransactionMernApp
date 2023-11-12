@@ -1,24 +1,27 @@
-import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
+// Import necessary dependencies from Redux Toolkit and Axios
+import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import axios from 'axios';
 
-
+// Define an asynchronous thunk for fetching statistics
 const fetchStatistics = createAsyncThunk(
     'statistics/fetchStatistics',
     async ({ monthIndex }) => {
-
         console.log(monthIndex);
         try {
+            // Fetch statistics data from the API based on the provided monthIndex
             const res = await axios.get(`http://localhost:8000/statistics?month=${monthIndex}`);
             const data = res.data;
             console.log(data);
-            return data
+            return data;
         } catch (error) {
-            console.log(error)
+            // Log the error and return it as the payload in case of an error
+            console.log(error);
             return error;
         }
     }
-)
+);
 
+// Define the initial state for statistics
 const initialState = {
     isLoading: false,
     error: null,
@@ -27,27 +30,33 @@ const initialState = {
         totalSoldItems: 0,
         totalNotSoldItems: 0
     },
-}
+};
 
+// Create a Redux slice for statistics
 export const statisticsSlice = createSlice({
     name: 'statistics',
     initialState,
-    reducers: {},
+    reducers: {},  // No additional reducers defined
     extraReducers: (builder) => {
+        // Handle different actions based on the asynchronous thunk status
         builder
             .addCase(fetchStatistics.pending, (state) => {
+                // Set loading state to true when the fetch is pending
                 state.isLoading = true;
             })
             .addCase(fetchStatistics.fulfilled, (state, action) => {
-                state.isLoading = false
-                state.statisStics = action.payload
+                // Set loading state to false and update statistics when the fetch is successful
+                state.isLoading = false;
+                state.statisStics = action.payload;
             })
             .addCase(fetchStatistics.rejected, (state, action) => {
-                state.isLoading = false
-                state.error = action.error.message
-            })
+                // Set loading state to false and update error state when the fetch is rejected
+                state.isLoading = false;
+                state.error = action.error.message;
+            });
     }
-})
+});
 
-export default statisticsSlice.reducer
-export { fetchStatistics }
+// Export the reducer and the asynchronous thunk
+export default statisticsSlice.reducer;
+export { fetchStatistics };

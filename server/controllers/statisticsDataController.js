@@ -1,8 +1,12 @@
+// Import the transactions model
 const Transaction = require('../models/transactionsModel');
 
+// Controller function to handle fetching statistics
 const handleGetStistics = async (req, res) => {
+    // Extract the month from the query parameters
     const month = req.query.month;
 
+    // Log the selected month for debugging
     console.log(month);
 
     try {
@@ -18,6 +22,7 @@ const handleGetStistics = async (req, res) => {
             { $group: { _id: null, totalSaleAmount: { $sum: '$price' } } },
         ]);
 
+        // Extract the total sale amount or default to 0 if not available
         let totalSaleAmount = totalAmountObj[0].totalSaleAmount || 0;
 
         // Get the total number of sold items of the selected month
@@ -36,14 +41,16 @@ const handleGetStistics = async (req, res) => {
             { $group: { _id: null, totalSoldItems: { $sum: 1 } } }
         ]);
 
+        // Log the total sold items for debugging
         console.log(totalSoldItemsObj);
 
+        // Extract the total number of sold items or default to 0 if not available
         let totalSoldItems = totalSoldItemsObj[0].totalSoldItems || 0;
 
         // Get the total number of not sold items of the selected month
         const totalNotSoldItems = await Transaction.estimatedDocumentCount({ dateOfSale: { $month: '$dateOfSale' } }) - totalSoldItems;
 
-        // Send the response
+        // Send the response with the calculated statistics
         res.send({
             totalSaleAmount,
             totalSoldItems,
@@ -51,11 +58,13 @@ const handleGetStistics = async (req, res) => {
         });
 
     } catch (error) {
+        // Log and handle errors
         console.error('Error retrieving transactions:', error);
         res.status(500).json({ error: 'Error retrieving transactions' });
     }
 }
 
+// Export the controller function
 module.exports = {
     handleGetStistics,
 }

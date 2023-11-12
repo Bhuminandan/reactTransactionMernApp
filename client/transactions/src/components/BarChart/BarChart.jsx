@@ -1,10 +1,14 @@
-import { useEffect, useState } from "react"
-import { useDispatch, useSelector } from "react-redux"
-import { ResponsiveContainer, BarChart as ReBarChart , Bar, XAxis, YAxis, Tooltip } from 'recharts'
-import { fetchBarChartData } from "../../redux/features/chartDataSlice"
+// Import necessary dependencies from React and Redux
+import{ useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { ResponsiveContainer, BarChart as ReBarChart, Bar, XAxis, YAxis, Tooltip } from 'recharts';
 
+// Import the action to fetch bar chart data
+import { fetchBarChartData } from "../../redux/features/chartDataSlice";
+import Loader from "../Loaders/Loader";
+
+// Functional component for the BarChart
 const BarChart = () => {
-
 
   const [chartData, setChartData] = useState([
     {
@@ -60,43 +64,70 @@ const BarChart = () => {
     }
   ])
 
-  const dispatch = useDispatch()
-  const { monthIndex, month } = useSelector((state) => state.currentMonth.currentMonth)
-  const { isLoading, error, chartData : data } = useSelector((state) => state.chartData)
 
+  // Redux setup
+  const dispatch = useDispatch();
+  const { monthIndex, month } = useSelector((state) => state.currentMonth.currentMonth);
+  const { isLoading, error, chartData: data } = useSelector((state) => state.chartData);
 
+  // Log the chart data received from Redux
   console.log(data);
 
+  // Fetch chart data on component mount or when the monthIndex changes
   useEffect(() => {
-    dispatch(fetchBarChartData({ monthIndex }))
-  }, [monthIndex, dispatch])
+    dispatch(fetchBarChartData({ monthIndex }));
+  }, [monthIndex, dispatch]);
+
+  // Handling loading condition
+  if(isLoading) {
+    return (
+      <div className="bg-zinc-900 w-full min-h-screen text-slate-400">
+        <Loader/>
+      </div>
+    )
+  }
+
+  // Handling Error condition
+  if (error) {
+    return (
+      <div className="bg-zinc-900 w-full min-h-screen text-slate-400">
+        <p>something went wrong: {error}</p>
+      </div>
+    )
+  }
 
 
-
-
-
-
+  // Render the BarChart component
   return (
     <div className="w-screen min-h-screen bg-zinc-900 text-green-50 flex items-center justify-start gap-5">
       <div className="w-1/2 m-auto flex flex-col items-start justify-start gap-5">
-      <h1 className="text-xl font-bold text-slate-600">Transactions for : <span className="text-2xl font-bold text-slate-400">{month}</span></h1>
-      <div className="w-full m-auto bg-zinc-950 p-20 rounded-3xl">
-      <ResponsiveContainer width={500} height={300}>
-        <ReBarChart
-          width={500}
-          height={300}
-          data={chartData}
-        >
-          <XAxis dataKey="pricerange" />
-          <YAxis />
-          <Tooltip />
-          <Bar dataKey="numofitems" fill="#8884d8" />
-        </ReBarChart>
-      </ResponsiveContainer>
-      </div>
+        {/* Display the selected month */}
+        <h1 className="text-xl font-bold text-slate-600">Transactions for : <span className="text-2xl font-bold text-slate-400">{month}</span></h1>
+        {/* BarChart container */}
+        <div className="w-full m-auto bg-zinc-950 p-20 rounded-3xl">
+          {/* ResponsiveContainer for dynamic size */}
+          <ResponsiveContainer width={500} height={300}>
+            {/* ReBarChart component with XAxis, YAxis, Tooltip, and Bar */}
+            <ReBarChart
+              width={500}
+              height={300}
+              data={chartData}
+            >
+              {/* X-axis displaying pricerange */}
+              <XAxis dataKey="pricerange" />
+              {/* Y-axis */}
+              <YAxis />
+              {/* Tooltip for data points */}
+              <Tooltip />
+              {/* Bar representing the number of items */}
+              <Bar dataKey="numofitems" fill="#8884d8" />
+            </ReBarChart>
+          </ResponsiveContainer>
+        </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default BarChart
+// Export the BarChart component
+export default BarChart;

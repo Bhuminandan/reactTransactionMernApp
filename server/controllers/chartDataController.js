@@ -1,9 +1,12 @@
+// Import the transactions model
 const Transaction = require('../models/transactionsModel');
 
-
+// Controller function to handle fetching data for chart
 const handleGetChartData = async (req, res) => {
+    // Extract the month from the query parameters
     const month = parseInt(req.query.month);
 
+    // Log the selected month for debugging
     console.log(month);
 
     try {
@@ -20,6 +23,7 @@ const handleGetChartData = async (req, res) => {
             { $group: { _id: null, totalSaleAmount: { $sum: '$price' } } },
         ]);
 
+        // Extract the total sale amount or default to 0 if not available
         let totalSaleAmount = totalAmountObj[0]?.totalSaleAmount || 0;
 
         // Get the price range distribution
@@ -45,15 +49,17 @@ const handleGetChartData = async (req, res) => {
             },
         ]);
 
-        // Send the response
+        // Send the price range distribution as the response
         res.send(priceRangeDistribution);
 
     } catch (error) {
+        // Log and handle errors
         console.error('Error retrieving transactions:', error);
         res.status(500).json({ error: 'Error retrieving transactions' });
     }
 }
 
+// Export the controller function
 module.exports = {
     handleGetChartData,
 };
