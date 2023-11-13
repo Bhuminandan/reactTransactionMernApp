@@ -10,50 +10,22 @@ import Loader from "../Loaders/Loader";
 // Functional component for the BarChart
 const BarChart = () => {
 
+  
+  // Redux setup
+  const dispatch = useDispatch();
+  const { monthIndex, month } = useSelector((state) => state.currentMonth.currentMonth);
   const [screenWidth, setScreenWidth] = useState(window.innerWidth);
-  const [chartData, setChartData] = useState([
-    {
-      'pricerange': '0 - 100',
-      'solditems': 2
-    },
-    {
-      'pricerange': '101 - 200',
-      'solditems': 3
-    },
-    {
-      'pricerange': '201 - 300',
-      'solditems': 4
-    },
-    {
-      'pricerange': '301 - 400',
-      'solditems': 5
-    },
-    {
-      'pricerange': '401 - 500',
-      'solditems': 6
-    },
-    {
-      'pricerange': '501 - 600',
-      'solditems': 7
+  const barchartData = useSelector(state => state.chartData)
+  const { chartData, isLoading, error } = barchartData || {};
+    
+  
+  console.log(barchartData);
 
-    },
-    {
-      'pricerange': '601 - 700',
-      'solditems': 1
-    },
-    {
-      'pricerange': '701 - 800',
-      'solditems': 2
-    },
-    {
-      'pricerange': '801 - 900',
-      'solditems': 7
-    },
-    {
-      'pricerange': '901 - above',
-      'solditems': 2
-    }
-  ])
+
+  useEffect(() => {
+    dispatch(fetchBarChartData({ monthIndex }));
+  }, []);
+
 
   // Getting inner width of the screen
 
@@ -67,13 +39,6 @@ const BarChart = () => {
     }
   })
 
-  // Redux setup
-  const dispatch = useDispatch();
-  const { monthIndex, month } = useSelector((state) => state.currentMonth.currentMonth);
-  const { isLoading, error, chartData: data } = useSelector((state) => state.chartData);
-
-  // Log the chart data received from Redux
-  console.log(data);
 
   // Fetch chart data on component mount or when the monthIndex changes
   useEffect(() => {
@@ -104,7 +69,7 @@ const BarChart = () => {
     <div className="w-screen min-h-screen bg-zinc-900 text-green-50 flex items-center justify-start gap-5">
       <div className="md:w-[800px] w-[400px] m-auto flex flex-col items-start justify-start gap-5 px-5">
         {/* Display the selected month */}
-        <h1 className="text-xl font-bold text-slate-600">Transactions for : <span className="text-2xl font-bold text-slate-400">{month}</span></h1>
+        <h1 className="text-xl font-bold text-slate-600">Transactions for : <span className="text-2xl uppercase font-bold text-slate-400">{month}</span></h1>
         {/* BarChart container */}
         <div className="w-full m-auto bg-zinc-950 md:p-10 p-5 rounded-3xl border flex items-center justify-center">
           {/* ResponsiveContainer for dynamic size */}
@@ -116,9 +81,9 @@ const BarChart = () => {
               data={chartData}
             >
               {/* X-axis displaying pricerange */}
-              <XAxis dataKey="pricerange" />
+              <XAxis dataKey="_id" />
               {/* Y-axis */}
-              <YAxis />
+              <YAxis dataKey="numofitems" />
               {/* Tooltip for data points */}
               <Tooltip />
               {/* Bar representing the number of items */}

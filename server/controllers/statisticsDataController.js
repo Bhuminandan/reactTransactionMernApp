@@ -6,9 +6,6 @@ const handleGetStistics = async (req, res) => {
     // Extract the month from the query parameters
     const month = req.query.month;
 
-    // Log the selected month for debugging
-    console.log(month);
-
     try {
         // Get the total sale amount of the selected month
         const totalAmountObj = await Transaction.aggregate([
@@ -37,7 +34,6 @@ const handleGetStistics = async (req, res) => {
                     }
                 }
             },
-            { $match: { sold: true } },
             { $group: { _id: null, totalSoldItems: { $sum: 1 } } }
         ]);
 
@@ -48,7 +44,22 @@ const handleGetStistics = async (req, res) => {
         let totalSoldItems = totalSoldItemsObj[0].totalSoldItems || 0;
 
         // Get the total number of not sold items of the selected month
-        const totalNotSoldItems = await Transaction.estimatedDocumentCount({ dateOfSale: { $month: '$dateOfSale' } }) - totalSoldItems;
+        const totalNotSoldItemsObj = await Transaction.aggregate([
+            {
+                $match: {
+                    $expr: {
+                        $and: [
+                            { $eq: [{ $month: "$dateOfSale" }, parseInt(month)] },
+                            { $eq: ["$sold", false] }
+                        ]
+                    }
+                }
+            },
+            { $group: { _id: null, totalNotSoldItems: { $sum: 1 } } }
+        ]);
+
+        // Extract the total number of not sold items or default to 0 if not available
+        const totalNotSoldItems = totalNotSoldItemsObj.length > 0 ? totalNotSoldItemsObj[0].totalNotSoldItems : 0;
 
         // Send the response with the calculated statistics
         res.send({

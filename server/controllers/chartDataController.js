@@ -3,36 +3,18 @@ const Transaction = require('../models/transactionsModel');
 
 // Controller function to handle fetching data for chart
 const handleGetChartData = async (req, res) => {
-    // Extract the month from the query parameters
-    const month = parseInt(req.query.month);
 
-    // Log the selected month for debugging
-    console.log(month);
+    // Extract the month from the query parameters
+    const month = parseInt(req.query.month) || 1;
 
     try {
-        // Get the total sale amount of the selected month
-        const totalAmountObj = await Transaction.aggregate([
-            {
-                $match: {
-                    dateOfSale: {
-                        $gte: new Date(new Date().getFullYear(), month - 1, 1),
-                        $lt: new Date(new Date().getFullYear(), month, 1),
-                    }
-                }
-            },
-            { $group: { _id: null, totalSaleAmount: { $sum: '$price' } } },
-        ]);
-
-        // Extract the total sale amount or default to 0 if not available
-        let totalSaleAmount = totalAmountObj[0]?.totalSaleAmount || 0;
 
         // Get the price range distribution
         const priceRangeDistribution = await Transaction.aggregate([
             {
                 $match: {
-                    dateOfSale: {
-                        $gte: new Date(new Date().getFullYear(), month - 1, 1),
-                        $lt: new Date(new Date().getFullYear(), month, 1),
+                    $expr: {
+                        $eq: [{ $month: "$dateOfSale" }, parseInt(month)]
                     }
                 }
             },
