@@ -28,7 +28,6 @@ const Table = () => {
   const { transactions, isLoading, error } = transactionsData || {};
   const {totalItemsFound, filteredData} = transactions || {};
 
-  console.log(transactionsData);
 
   // Get the current month from the Redux store
   const dispatch = useDispatch();
@@ -153,7 +152,7 @@ const Table = () => {
             {/* Else Render the table */}
 
               {/* Table */}
-              <table className="w-full text-slate-500">
+              <table className="w-full text-slate-500 px-5">
 
               {/* Table Header */}
               <thead>
@@ -216,14 +215,14 @@ const Table = () => {
     }
 
     {/* Pagination */}
-    <div className="w-full my-20">
-      <ul className="flex justify-center gap-5 py-2 px-4 bg-slate-500 rounded-2xl">
+    <div className="w-full my-20 px-2">
+      <ul className="flex justify-center gap-5 py-2 px-2 bg-slate-500 rounded-2xl">
 
           {
             // Disable previous button if currentPage is 1
             !isPreviousDisabled && (
             <li 
-            className={`rounded-full px-4 py-2 active:translate-y-1 duration-300 hover:bg-gray-600 cursor-pointer font-bold text-slate-200`}
+            className={`rounded-full md:px-4 px-2 py-2 active:translate-y-1 duration-300 hover:bg-gray-600 cursor-pointer font-bold text-slate-200`}
             onClick={handlePageClick}
             value={currentPage - 1}
             >  
@@ -236,7 +235,7 @@ const Table = () => {
           // Create pagination buttons
           Array.from({ length: totalPages }, (_, index) => (
             <li 
-            className={`rounded-full px-4 py-2 active:translate-y-1 duration-300 hover:bg-gray-600 cursor-pointer font-bold text-slate-200 ${index + 1 === currentPage ? "bg-slate-700" : "bg-slate-500"} `}
+            className={`rounded-full md:px-4 px-2 py-2 active:translate-y-1 duration-300 hover:bg-gray-600 cursor-pointer font-bold text-slate-200 ${index + 1 === currentPage ? "bg-slate-700" : "bg-slate-500"} `}
             onClick={handlePageClick}
             key={index} value={index + 1}>{index + 1}</li>
           ))
@@ -248,7 +247,7 @@ const Table = () => {
             // Disable next button if currentPage is totalPages
             !isNextDisabled && (
               <li 
-              className={`rounded-full px-4 py-2 active:translate-y-1 duration-300 hover:bg-gray-600 cursor-pointer font-bold text-slate-200`}
+              className={`rounded-full md:px-4 px-2 active:translate-y-1 duration-300 hover:bg-gray-600 cursor-pointer font-bold text-slate-200`}
               onClick={handlePageClick}
               value={currentPage + 1}
               >  
