@@ -7,16 +7,14 @@ const pieChartDataController = async (req, res) => {
     // Extract the month from the query parameters
     const month = parseInt(req.query.month) || 1;
 
+    console.log(month);
+
     try {
 
         // Get the price range distribution
         const categoriesDistribution = await Transaction.aggregate([
             {
-                $match: {
-                    $expr: {
-                        $eq: [{ $month: "$dateOfSale" }, parseInt(month)]
-                    }
-                }
+                $match: { $expr: { $eq: [{ $month: "$dateOfSale" }, month] } }
             },
             {
                 $group: {
@@ -28,6 +26,7 @@ const pieChartDataController = async (req, res) => {
         ]);
 
         // Send the price range distribution as the response
+
         res.send(categoriesDistribution);
 
     } catch (error) {

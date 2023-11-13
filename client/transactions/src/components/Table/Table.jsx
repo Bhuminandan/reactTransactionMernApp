@@ -28,15 +28,25 @@ const Table = () => {
   const { transactions, isLoading, error } = transactionsData || {};
   const {totalItemsFound, filteredData} = transactions || {};
 
+  console.log(transactionsData);
+
   // Get the current month from the Redux store
   const dispatch = useDispatch();
   const { monthIndex} = useSelector((state) => state.currentMonth.currentMonth);
 
   // Fetch transactions on component mount
   useEffect(() => {
+
+    // deboucing fetch funciton to reduce number of API calls while seaching
     debouncedFetch(dispatch, currentPage, searchedTerm)
-    setTotalPages(Math.ceil(totalItemsFound / 10))
-  }, [dispatch, currentPage, searchedTerm])
+
+    // Calculating total number of pages
+    const numberOfPages = Math.ceil(totalItemsFound / 10);
+
+    // Setting the total number of pages after checking 
+    setTotalPages(numberOfPages < 10 ? numberOfPages : 10);
+
+  }, [dispatch, currentPage, searchedTerm, totalItemsFound]);
 
 
   // Handle month selection
@@ -97,7 +107,6 @@ const Table = () => {
 
     {/* Search bar and month selection div */}
     <div className="flex flex-wrap gap-5 justify-between w-full py-5">
-
       {/* Search Bar */}
       <div>
         <input 
@@ -128,67 +137,83 @@ const Table = () => {
           }
         </select>
       </div>
-
     </div>
 
-    {/* Table */}
-    <table className="w-full text-slate-500">
+    {
+      // Display message if no data found
+          filteredData &&
+          filteredData.length === 0 ? (
+            <div className="w-full h-full flex items-center justify-center">
+              <p>No data found</p>
+            </div>
+      )
+      :
+      (
+            <>
+            {/* Else Render the table */}
 
-      {/* Table Header */}
-      <thead>
+              {/* Table */}
+              <table className="w-full text-slate-500">
 
-        {/* Table Row */}
-        <tr className="overflow-hidden text-slate-800 uppercase hover:bg-slate-300 duration-300 ">
-          <th className=" bg-slate-200 px-4 py-2 hover:bg-slate-300 rounded-tl-md duration-300 ">Id</th>
-          <th className="bg-slate-200 px-4 py-2 hover:bg-slate-300 duration-300 ">Title</th>
-          <th className="bg-slate-200 px-4 py-2 hover:bg-slate-300 duration-300 ">Description</th>
-          <th className="bg-slate-200 px-4 py-2 hover:bg-slate-300 duration-300 w-24">Price</th>
-          <th className="bg-slate-200 px-4 py-2 hover:bg-slate-300 duration-300 ">Category</th>
-          <th className="bg-slate-200 px-4 py-2 hover:bg-slate-300 duration-300 ">Sold</th>
-          <th className=" hover:bg-slate-300 duration-300 rounded-tr-md bg-slate-200 px-4 py-2">Image</th>
-        </tr>
+              {/* Table Header */}
+              <thead>
 
-      </thead>
+                {/* Table Row */}
+                <tr className="overflow-hidden text-slate-800 uppercase hover:bg-slate-300 duration-300 ">
+                  <th className=" bg-slate-200 px-4 py-2 hover:bg-slate-300 rounded-tl-md duration-300 ">Id</th>
+                  <th className="bg-slate-200 px-4 py-2 hover:bg-slate-300 duration-300 ">Title</th>
+                  <th className="bg-slate-200 px-4 py-2 hover:bg-slate-300 duration-300 ">Description</th>
+                  <th className="bg-slate-200 px-4 py-2 hover:bg-slate-300 duration-300 w-24">Price</th>
+                  <th className="bg-slate-200 px-4 py-2 hover:bg-slate-300 duration-300 ">Category</th>
+                  <th className="bg-slate-200 px-4 py-2 hover:bg-slate-300 duration-300 ">Sold</th>
+                  <th className=" hover:bg-slate-300 duration-300 rounded-tr-md bg-slate-200 px-4 py-2">Image</th>
+                </tr>
 
-      {/* Table Body */}
-      <tbody className="text-slate-200 p-4">
+              </thead>
 
-        {
-          filteredData?.length === 0 ?
-          
-          // Display a message if no data is found
-          <div className="flex items-center justify-center w-full mt-10">
-            <p className="md:text-xl text-md font-semibold text-slate-500">No data found, Try searching for something else...</p>
-          </div>
+              {/* Table Body */}
+              <tbody className="text-slate-200 p-4">
 
-          :
+                {
+                  filteredData?.length === 0 ?
+                  
+                  // Display a message if no data is found
+                  <div className="flex items-center justify-center w-full mt-10">
+                    <p className="md:text-xl text-md font-semibold text-slate-500">No data found, Try searching for something else...</p>
+                  </div>
 
-          // Mapping the data to create rows
-          filteredData?.map((transaction) => {
-            return (
-              <tr key={nanoid()} className="p-4 text-start">
-                <td className="border-2 border-zinc-700 p-4 text-xl font-bold">{transaction.id}</td>
-                <td className="border-2 border-zinc-700 p-4 font-semibold w-56">{transaction.title}</td>
-                <td className="border-2 border-zinc-700 p-4 text-xs">{transaction.description}</td>
-                <td className="border-2 border-zinc-700 text-center w-20 font-semibold">${transaction.price}</td>
-                <td className="border-2 border-zinc-700 p-4">{transaction.category}</td>
-                <td className={`border-2 border-zinc-700 p-4 text-center ${ !transaction.sold ? "text-green-500 " : "text-red-500 " }`}>
+                  :
 
-                  <p className={!transaction.sold ? "rounded-full text-white p-2 font-bold bg-green-500 " : "rounded-full text-white p-2 font-bold bg-red-500 "}>{transaction.sold ? "SOLD" : "AVAILABLE"}</p>
+                  // Mapping the data to create rows
+                  filteredData?.map((transaction) => {
+                    return (
+                      <tr key={nanoid()} className="p-4 text-start">
+                        <td className="border-2 border-zinc-700 p-4 text-xl font-bold">{transaction.id}</td>
+                        <td className="border-2 border-zinc-700 p-4 font-semibold w-56">{transaction.title}</td>
+                        <td className="border-2 border-zinc-700 p-4 text-xs">{transaction.description}</td>
+                        <td className="border-2 border-zinc-700 text-center w-20 font-semibold">${transaction.price}</td>
+                        <td className="border-2 border-zinc-700 p-4">{transaction.category}</td>
+                        <td className={`border-2 border-zinc-700 p-4 text-center ${ !transaction.sold ? "text-green-500 " : "text-red-500 " }`}>
 
-                </td>
-                <td className="border-2 border-zinc-700 p-4 w-56">
-                  <img src={transaction.image} alt="transaction img" className="w-full object-cover rounded-lg"/>
-                </td>
-              </tr>
-            )
-          })
-        }
+                          <p className={!transaction.sold ? "rounded-full text-white p-2 font-bold bg-green-500 " : "rounded-full text-white p-2 font-bold bg-red-500 "}>{transaction.sold ? "SOLD" : "AVAILABLE"}</p>
+
+                        </td>
+                        <td className="border-2 border-zinc-700 p-4 w-56">
+                          <img src={transaction.image} alt="transaction img" className="w-full object-cover rounded-lg"/>
+                        </td>
+                      </tr>
+                    )
+                  })
+                }
 
 
-      </tbody>
+              </tbody>
 
-    </table>
+              </table>
+
+            </>
+      )
+    }
 
     {/* Pagination */}
     <div className="w-full my-20">
@@ -233,7 +258,6 @@ const Table = () => {
           }
       </ul>
     </div>
-
 
   </div>
 )

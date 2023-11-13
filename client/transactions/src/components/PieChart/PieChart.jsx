@@ -1,14 +1,15 @@
-import { useEffect, useState } from "react"
+import { useEffect } from "react"
 import { Pie, ResponsiveContainer, PieChart as RePieChart, Tooltip } from "recharts"
 import { useDispatch, useSelector } from "react-redux"
 import { fetchPieChartData } from "../../redux/features/pieChartDataSlice";
+import Loader from "../Loaders/Loader";
 
 const PieChart = () => {
 
 
   const dispatch = useDispatch();
 
-  const { month } = useSelector((state) => state.currentMonth.currentMonth);
+  const { monthIndex, month } = useSelector((state) => state.currentMonth.currentMonth);
   const pieChartDataObj = useSelector(state => state.pieChartData);
   const { chartData, isLoading, error } = pieChartDataObj || {};
 
@@ -17,8 +18,24 @@ const PieChart = () => {
   console.log("pieChartData", chartData);
  
   useEffect(() => {
-    dispatch(fetchPieChartData({ month }));
+    dispatch(fetchPieChartData({ monthIndex }));
   }, [month, dispatch]);
+
+  if (isLoading) {
+    return (
+      <div className="bg-zinc-900 w-full min-h-screen text-slate-400 flex items-center justify-center">
+        <Loader />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-zinc-900 w-full min-h-screen text-slate-400">
+        <p>{error}</p>
+      </div>
+    )
+  }
 
 
   return (
