@@ -4,11 +4,13 @@ import { lazy, Suspense } from 'react';
 import './App.css';
 import Loader from './components/Loaders/Loader';
 
+
 // Lazy importing components
 const Layout = lazy(() => import('./components/layout/Layout'));
 const Home = lazy(() => import('./components/Home/Home'));
 const Statistics = lazy(() => import('./components/Statistics/Statistics'));
 const BarChart = lazy(() => import('./components/BarChart/BarChart'));
+const PieChart = lazy(() => import('./components/PieChart/PieChart'));
 
 function App() {
   return (
@@ -16,7 +18,7 @@ function App() {
 
       {/* Render the Suspense component with component */}
 
-      <Suspense fallback={<div className='w-screen min-h-screen flex items-center justify-center'><Loader /></div>}>
+      <Suspense fallback={<div className='w-screen min-h-screen flex items-center justify-center bg-zinc-900'><Loader /></div>}>
 
       {/* Define the routes using React Router */}
       <Routes>
@@ -30,6 +32,10 @@ function App() {
 
           {/* Route for the '/barchart' path, rendering the BarChart component */}
           <Route path='/barchart' element={<BarChart />} />
+
+          {/* Route for '/piechart' path, rendering the PieChart component */}
+          <Route path='/piechart' element={<PieChart />} />
+
         </Route>
       </Routes>
       </Suspense>

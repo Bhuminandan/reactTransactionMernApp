@@ -11,8 +11,12 @@ const Navbar = () => {
       {/* Navigation links with NavLink for active styling */}
       <div className="flex gap-4 font-bold">
         <NavLink to='/' className={({ isActive }) => isActive ? "text-slate-300" : "text-slate-500"}>Table</NavLink>
+
         <NavLink to='/statistics' className={({ isActive }) => isActive ? "text-slate-300" : "text-slate-500"}>Statistics</NavLink>
+
         <NavLink to='/barchart' className={({ isActive }) => isActive ? "text-slate-300" : "text-slate-500"}>Bar Chart</NavLink>
+
+        <NavLink to='/piechart' className={({ isActive }) => isActive ? "text-slate-300" : "text-slate-500"}>Pie Chart</NavLink>
       </div>
     </div>
   );

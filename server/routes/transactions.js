@@ -12,12 +12,14 @@ const handleGetChartData = require('../controllers/chartDataController').handleG
 // Import the transactions model and controller
 const Transaction = require('../models/transactionsModel');
 const transactionsController = require('../controllers/transactionsController');
+const { pieChartDataController } = require('../controllers/pieChartDataController');
 
 // Initialize the database when a specific route is accessed
 router.get('/', async (req, res) => {
     await transactionsController.initializeDatabase();
     res.json({ message: 'Database initialized successfully' });
 });
+
 
 // API to handle search and initial render
 router.get('/find', handleSearchResults);
@@ -27,6 +29,10 @@ router.get('/statistics', handleGetStistics);
 
 // API to get Chart Data
 router.get('/barchart', handleGetChartData);
+
+// API to handle pie chart data
+router.get('/piechart', pieChartDataController);
+
 
 // Retrieve and send all transactions from the database
 router.get('/transactions', async (req, res) => {
