@@ -1,14 +1,23 @@
 // Import necessary dependencies and components
 import { Route, Routes } from 'react-router-dom';
+import { lazy, Suspense } from 'react';
 import './App.css';
-import Layout from './components/layout/Layout';
-import Home from './components/Home/Home';
-import Statistics from './components/Statistics/Statistics';
-import BarChart from './components/BarChart/BarChart';
+import Loader from './components/Loaders/Loader';
+
+// Lazy importing components
+const Layout = lazy(() => import('./components/layout/Layout'));
+const Home = lazy(() => import('./components/Home/Home'));
+const Statistics = lazy(() => import('./components/Statistics/Statistics'));
+const BarChart = lazy(() => import('./components/BarChart/BarChart'));
 
 function App() {
   return (
     <div className='w-sceen min-h-screen overflow-x-hidden'>
+
+      {/* Render the Suspense component with component */}
+
+      <Suspense fallback={<div className='w-screen min-h-screen flex items-center justify-center'><Loader /></div>}>
+
       {/* Define the routes using React Router */}
       <Routes>
         {/* Route for the root path */}
@@ -23,6 +32,7 @@ function App() {
           <Route path='/barchart' element={<BarChart />} />
         </Route>
       </Routes>
+      </Suspense>
     </div>
   );
 }
