@@ -20,7 +20,6 @@ router.get('/', async (req, res) => {
     res.json({ message: 'Database initialized successfully' });
 });
 
-
 // API to handle search and initial render
 router.get('/find', handleSearchResults);
 
@@ -32,18 +31,6 @@ router.get('/barchart', handleGetChartData);
 
 // API to handle pie chart data
 router.get('/piechart', pieChartDataController);
-
-
-// Retrieve and send all transactions from the database
-router.get('/transactions', async (req, res) => {
-    try {
-        const transactions = await Transaction.find();
-        res.json(transactions);
-    } catch (error) {
-        console.error('Error retrieving transactions:', error);
-        res.status(500).json({ error: 'Error retrieving transactions' });
-    }
-});
 
 // Export the router
 module.exports = router;
