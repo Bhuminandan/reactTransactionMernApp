@@ -11,6 +11,9 @@ export const currentDataSlice = createSlice({
         },
         currentCategory: {
             cureentCatergory: 'all'
+        },
+        currentSoldFilter: {
+            currentSoldFilter: 'all'
         }
     },
     reducers: {
@@ -20,11 +23,14 @@ export const currentDataSlice = createSlice({
         },
         setCurrentCategory: (state, action) => {
             state.currentCategory = action.payload
+        },
+        setCurrentSoldFilter: (state, action) => {
+            state.currentSoldFilter = action.payload;
         }
 
     }
 });
 
 // Export the action creator and the reducer
-export const { setCurrentMonth, setCurrentCategory } = currentDataSlice.actions;
+export const { setCurrentMonth, setCurrentCategory, setCurrentSoldFilter } = currentDataSlice.actions;
 export default currentDataSlice.reducer;

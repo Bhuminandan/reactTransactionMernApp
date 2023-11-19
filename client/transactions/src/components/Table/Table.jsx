@@ -6,12 +6,12 @@ import { fetchTransactions } from "../../redux/features/transactionsSlice";
 import { nanoid } from "@reduxjs/toolkit";
 import debounce from "../utils/debounce";
 import Loader from "../Loaders/Loader";
-import { setCurrentCategory, setCurrentMonth } from "../../redux/features/currentDataSlice";
+import { setCurrentCategory, setCurrentMonth, setCurrentSoldFilter } from "../../redux/features/currentDataSlice";
 
 
 // Debouncing the fetch
-const debouncedFetch = debounce((dispatch, currentPage, searchedTerm, currentCategory, currentMonth) => {
-  dispatch(fetchTransactions({ currentPage, searchedTerm, currentCategory, currentMonth }));
+const debouncedFetch = debounce((dispatch, currentPage, searchedTerm, currentCategory, currentMonth, currentSoldFilter) => {
+  dispatch(fetchTransactions({ currentPage, searchedTerm, currentCategory, currentMonth, currentSoldFilter }));
 }, 1000);
 
 const Table = () => {
@@ -22,14 +22,17 @@ const Table = () => {
   const [totalPages, setTotalPages] = useState(6)
   const [isPreviousDisabled, setIsPreviousDisabled] = useState(false)
   const [isNextDisabled, setIsNextDisabled] = useState(false)
-  const [selectedCategory, setSelectedCategory] = useState('')
+  const [selectedSoldFilter, setSeletedSoldFilter] = useState('all')
 
   // Get the transactions data from the Redux store
+  const currentCategory = useSelector((state)=> state.currentData.currentCategory);
+  const { monthIndex, month } = useSelector((state) => state.currentData.currentMonth);
+  const currentSoldFilter = useSelector((state)=> state.currentData.currentSoldFilter)
   const transactionsData = useSelector((state) => state.transactions)
   const { transactions, isLoading, error } = transactionsData || {};
   const {totalItemsFound, filteredData} = transactions || {};
-  const currentCategory = useSelector((state)=> state.currentData.currentCategory);
-  const { monthIndex, month } = useSelector((state) => state.currentData.currentMonth);
+
+  console.log(currentSoldFilter);
 
 
   // Get the current month from the Redux store
@@ -39,7 +42,7 @@ const Table = () => {
   useEffect(() => {
 
     // deboucing fetch funciton to reduce number of API calls while seaching
-    debouncedFetch(dispatch, currentPage, searchedTerm, currentCategory, monthIndex)
+    debouncedFetch(dispatch, currentPage, searchedTerm, currentCategory, monthIndex,currentSoldFilter)
 
     // Calculating total number of pages
     const numberOfPages = Math.ceil(totalItemsFound / 10);
@@ -47,7 +50,7 @@ const Table = () => {
     // Setting the total number of pages after checking 
     setTotalPages(numberOfPages <= 10 ? numberOfPages : 10);
 
-  }, [dispatch, currentCategory, searchedTerm, currentPage, monthIndex, totalItemsFound ]);
+  }, [dispatch, currentCategory, searchedTerm, currentPage, monthIndex, totalItemsFound,currentSoldFilter ]);
 
 
   // Handle month selection
@@ -89,12 +92,14 @@ const Table = () => {
 
 
   const handleSelectCategory = useCallback( (e) => {
-
-    setSelectedCategory(e.target.value)
     dispatch(setCurrentCategory(e.target.value))
 
   }, [dispatch])
 
+  const handleSoldSelectChange = useCallback((e) => {
+    setSeletedSoldFilter(e.target.value);
+    dispatch(setCurrentSoldFilter(e.target.value))
+  }, [dispatch])
 
   // Handling if the data is loading
   if (isLoading) {
@@ -121,6 +126,7 @@ const Table = () => {
 
     {/* Search bar and month selection div */}
     <div className="flex flex-wrap gap-5 justify-between w-full py-5">
+
       {/* Search Bar */}
       <div>
         <input 
@@ -132,7 +138,16 @@ const Table = () => {
         />
       </div>
 
+      {/* Right side filters div */}
       <div className="flex items-center justify-center gap-2">
+
+        {/* Selection for sold and available */}
+        <div className="text-white flex items-center justify-center gap-2 ">
+          <input checked={ selectedSoldFilter === 'all' ? true : false} onChange={handleSoldSelectChange} type="radio" className="soldselection" name="soldselection" value={'all'}/> All
+          <input checked={ selectedSoldFilter === 'Sold' ? true : false} onChange={handleSoldSelectChange} type="radio" className="soldselection" name="soldselection" value={'Sold'}/> Sold
+          <input checked={ selectedSoldFilter === 'Available' ? true : false} onChange={handleSoldSelectChange} type="radio" className="soldselection" name="soldselection" value={'Available'}/> Available
+        </div>
+
         {/* Category Selection */}
         <div>
           <select 

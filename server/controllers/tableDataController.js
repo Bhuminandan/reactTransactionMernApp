@@ -2,13 +2,7 @@ const Transaction = require('../models/transactionsModel');
 
 async function handleSearchResults(req, res) {
     try {
-        const { page, search, currentCatergory, currentMonth } = req.body;
-
-        console.log('inside api');
-        console.log(page);
-        console.log(search);
-        console.log(currentCatergory);
-        console.log(currentMonth)
+        const { page, search, currentCatergory, currentMonth, soldFilter } = req.body;
 
 
         // Define the number of items per page
@@ -16,9 +10,6 @@ async function handleSearchResults(req, res) {
 
         // Convert page number to skip value
         const skip = (page - 1) * itemsPerPage;
-
-        // Create a regular expression for case-insensitive search
-        const regex = new RegExp(search, 'i');
 
 
         // Aggregation pipeline
@@ -33,6 +24,23 @@ async function handleSearchResults(req, res) {
                     }
                 }
             });
+        }
+
+        // If sold filter is not 'all'
+        if (soldFilter !== 'all') {
+            if (soldFilter === "Sold") {
+                pipeline.push({
+                    $match: {
+                        sold: true
+                    }
+                })
+            } else {
+                pipeline.push({
+                    $match: {
+                        sold: false
+                    }
+                })
+            }
         }
 
         // if category is there

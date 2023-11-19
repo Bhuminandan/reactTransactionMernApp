@@ -5,12 +5,14 @@ import axios from 'axios';
 // Define an asynchronous thunk for fetching transactions
 export const fetchTransactions = createAsyncThunk(
     'transactions/fetchTransactions',
-    async ({ currentPage, searchedTerm, currentCategory = 'all', currentMonth }) => {
+    async ({ currentPage, searchedTerm, currentCategory = 'all', currentMonth, currentSoldFilter }) => {
 
 
         if (typeof currentCategory === 'object') {
             currentCategory = currentCategory.cureentCatergory
         }
+
+        console.log(currentSoldFilter);
 
         try {
             // Fetch transactions data from the API based on the provided currentPage and searchedTerm
@@ -18,7 +20,8 @@ export const fetchTransactions = createAsyncThunk(
                 page: currentPage,
                 search: searchedTerm,
                 currentCatergory: currentCategory,
-                currentMonth: currentMonth
+                currentMonth: currentMonth,
+                soldFilter: currentSoldFilter
             });
             const data = res.data;
             console.log(data);
