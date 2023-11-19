@@ -2,8 +2,14 @@ const Transaction = require('../models/transactionsModel');
 
 async function handleSearchResults(req, res) {
     try {
-        const { page, search, currentCatergory, currentMonth, soldFilter } = req.body;
+        let { page, search, currentCatergory, currentMonth, soldFilter } = req.body;
 
+
+        if (typeof soldFilter === 'object') {
+            soldFilter = soldFilter.currentSoldFilter;
+        }
+
+        console.log(currentMonth);
 
         // Define the number of items per page
         const itemsPerPage = 10;
@@ -16,7 +22,8 @@ async function handleSearchResults(req, res) {
         const pipeline = [];
 
         // if month is there
-        if (currentMonth !== 0) {
+        if (currentMonth !== '0') {
+            console.log('Getting inside current month');
             pipeline.push({
                 $match: {
                     $expr: {
@@ -66,26 +73,40 @@ async function handleSearchResults(req, res) {
             });
         }
 
-        let newPipeline = [...pipeline]
+        console.log(pipeline);
 
-        newPipeline.push({
-            $count: 'totalItemsFound'
-        })
+        if (pipeline.length !== 0) {
 
-        let totalItemsFound = await Transaction.aggregate(newPipeline);
+            let newPipeline = [...pipeline]
 
-        totalItemsFound = totalItemsFound[0]?.totalItemsFound || 0;
+            newPipeline.push({
+                $count: 'totalItemsFound'
+            })
 
+            let totalItemsFound = await Transaction.aggregate(newPipeline);
 
-        // Apply skip and limit separately
-        // If search term is provided, apply the search query
-        let filteredData = await Transaction.aggregate(pipeline)
-            .skip(skip)
-            .limit(itemsPerPage)
-            .exec();
+            totalItemsFound = totalItemsFound[0]?.totalItemsFound || 0;
 
 
-        res.json({ totalItemsFound, filteredData });
+            // Apply skip and limit separately
+            // If search term is provided, apply the search query
+            let filteredData = await Transaction.aggregate(pipeline)
+                .skip(skip)
+                .limit(itemsPerPage)
+                .exec();
+
+
+            res.json({ totalItemsFound, filteredData });
+        } else {
+            let filteredData = await Transaction.find({})
+                .skip(skip)
+                .limit(itemsPerPage)
+                .exec();
+
+            let totalItemsFound = await Transaction.find({}).count;
+            res.json({ totalItemsFound, filteredData });
+        }
+
     } catch (error) {
         console.log('Error in searching API', error);
         res.status(500).json({ error: 'Internal Server Error' });

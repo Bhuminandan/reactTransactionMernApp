@@ -1,5 +1,5 @@
 // Import nessary dependencies
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { monthData, categoryData } from "../../data";
 import { fetchTransactions } from "../../redux/features/transactionsSlice";
@@ -25,12 +25,12 @@ const Table = () => {
   const [selectedSoldFilter, setSeletedSoldFilter] = useState('all')
 
   // Get the transactions data from the Redux store
-  const currentCategory = useSelector((state)=> state.currentData.currentCategory);
+  const currentCategory = useSelector((state) => state.currentData.currentCategory);
   const { monthIndex, month } = useSelector((state) => state.currentData.currentMonth);
-  const currentSoldFilter = useSelector((state)=> state.currentData.currentSoldFilter)
-  const transactionsData = useSelector((state) => state.transactions)
-  const { transactions, isLoading, error } = transactionsData || {};
-  const {totalItemsFound, filteredData} = transactions || {};
+  const currentSoldFilter = useSelector((state) => state.currentData.currentSoldFilter);
+  const transactionsData = useSelector((state) => state.transactions);
+  const { transactions, isLoading, error } = useMemo(() => transactionsData || {}, [transactionsData]);
+  const { totalItemsFound, filteredData } = useMemo(() => transactions || {}, [transactions]);
 
   console.log(currentSoldFilter);
 
@@ -40,6 +40,8 @@ const Table = () => {
 
   // Fetch transactions on component mount
   useEffect(() => {
+
+    console.log(monthIndex);
 
     // deboucing fetch funciton to reduce number of API calls while seaching
     debouncedFetch(dispatch, currentPage, searchedTerm, currentCategory, monthIndex,currentSoldFilter)
@@ -59,9 +61,6 @@ const Table = () => {
     // Get the selected month name and index
     const selectedMonthName = e.target.value;
     const selectedMonthIndex = e.target.options[e.target.selectedIndex].dataset.index;
-  
-    console.log(selectedMonthName);
-    console.log(selectedMonthIndex);
 
     // Dispatch the action with the selected month information
     dispatch(setCurrentMonth({ month: selectedMonthName, monthIndex: selectedMonthIndex }));
@@ -154,7 +153,7 @@ const Table = () => {
           value={currentCategory}
           onChange={handleSelectCategory}
           name="month" id="month" className="border outline-none py-2 px-2 rounded-lg cursor-pointer bg-slate-200">
-            <option key={'defaultOption'} value={''}>Select Category</option>
+            <option key={'defaultOption'} value={'all'}>Select Category</option>
 
             {
               categoryData.map((category) => {
