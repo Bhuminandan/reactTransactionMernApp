@@ -32,16 +32,11 @@ const Table = () => {
   const { transactions, isLoading, error } = useMemo(() => transactionsData || {}, [transactionsData]);
   const { totalItemsFound, filteredData } = useMemo(() => transactions || {}, [transactions]);
 
-  console.log(currentSoldFilter);
-
-
   // Get the current month from the Redux store
   const dispatch = useDispatch();
 
   // Fetch transactions on component mount
   useEffect(() => {
-
-    console.log(monthIndex);
 
     // deboucing fetch funciton to reduce number of API calls while seaching
     debouncedFetch(dispatch, currentPage, searchedTerm, currentCategory, monthIndex,currentSoldFilter)

@@ -4,7 +4,13 @@ const Transaction = require('../models/transactionsModel');
 // Controller function to handle fetching statistics
 const handleGetStistics = async (req, res) => {
     // Extract the month from the query parameters
-    const month = req.query.month;
+    let month = req.query.month;
+
+    if (month == 0) {
+        month = 1
+    }
+
+    console.log(month);
 
     try {
         // Get the total sale amount of the selected month

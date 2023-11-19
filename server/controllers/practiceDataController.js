@@ -4,7 +4,11 @@ const Transaction = require('../models/transactionsModel');
 // Controller function to handle fetching data for chart
 const practiceDataController = async (req, res) => {
 
-    const { month } = req.body;
+    let { month } = req.body;
+
+    if (month == 0) {
+        month = 1;
+    }
 
     const monthlySalesReport = await Transaction.aggregate([
         {

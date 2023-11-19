@@ -14,12 +14,11 @@ const Statistics = () => {
   const { isLoading, error, statisStics } = statisSticsObj || {};
   const { totalSoldItems, totalNotSoldItems, totalSaleAmount } = statisStics || {};
 
-  console.log(isLoading);
 
   // Fetch statistics on component mount or when the monthIndex changes
   useEffect(() => {
     dispatch(fetchStatistics({ monthIndex }));
-  }, [month, dispatch]);
+  }, [month, dispatch, monthIndex]);
 
   // Render loading state if data is still loading
   if (isLoading) {

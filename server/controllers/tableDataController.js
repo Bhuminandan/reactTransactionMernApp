@@ -22,7 +22,7 @@ async function handleSearchResults(req, res) {
         const pipeline = [];
 
         // if month is there
-        if (currentMonth !== '0') {
+        if (currentMonth != 0) {
             console.log('Getting inside current month');
             pipeline.push({
                 $match: {
@@ -73,7 +73,7 @@ async function handleSearchResults(req, res) {
             });
         }
 
-        console.log(pipeline);
+        console.log(JSON.stringify(pipeline, null, 2));
 
         if (pipeline.length !== 0) {
 

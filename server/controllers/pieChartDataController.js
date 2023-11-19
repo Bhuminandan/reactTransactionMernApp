@@ -5,9 +5,10 @@ const Transaction = require('../models/transactionsModel');
 const pieChartDataController = async (req, res) => {
 
     // Extract the month from the query parameters
-    const month = parseInt(req.query.month) || 1;
+    let month = parseInt(req.query.month);
 
-    console.log(month);
+    month = month == 0 ? 1 : month;
+
 
     try {
 
