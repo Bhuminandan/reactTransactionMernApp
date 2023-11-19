@@ -1,3 +1,3 @@
 import monthData from "./monthData";
-
-export { monthData } 
+import categoryData from './categoryData'
+export { monthData, categoryData } 

@@ -1,17 +1,17 @@
 // Import nessary dependencies
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { monthData } from "../../data";
+import { monthData, categoryData } from "../../data";
 import { fetchTransactions } from "../../redux/features/transactionsSlice";
 import { nanoid } from "@reduxjs/toolkit";
 import debounce from "../utils/debounce";
 import Loader from "../Loaders/Loader";
-import { setCurrentMonth } from "../../redux/features/currentMonthSlice";
+import { setCurrentCategory, setCurrentMonth } from "../../redux/features/currentDataSlice";
 
 
 // Debouncing the fetch
-const debouncedFetch = debounce((dispatch, currentPage, searchedTerm) => {
-  dispatch(fetchTransactions({ currentPage, searchedTerm }));
+const debouncedFetch = debounce((dispatch, currentPage, searchedTerm, currentCategory, currentMonth) => {
+  dispatch(fetchTransactions({ currentPage, searchedTerm, currentCategory, currentMonth }));
 }, 1000);
 
 const Table = () => {
@@ -22,30 +22,32 @@ const Table = () => {
   const [totalPages, setTotalPages] = useState(6)
   const [isPreviousDisabled, setIsPreviousDisabled] = useState(false)
   const [isNextDisabled, setIsNextDisabled] = useState(false)
+  const [selectedCategory, setSelectedCategory] = useState('')
 
   // Get the transactions data from the Redux store
   const transactionsData = useSelector((state) => state.transactions)
   const { transactions, isLoading, error } = transactionsData || {};
   const {totalItemsFound, filteredData} = transactions || {};
+  const currentCategory = useSelector((state)=> state.currentData.currentCategory);
+  const { monthIndex, month } = useSelector((state) => state.currentData.currentMonth);
 
 
   // Get the current month from the Redux store
   const dispatch = useDispatch();
-  const { monthIndex} = useSelector((state) => state.currentMonth.currentMonth);
 
   // Fetch transactions on component mount
   useEffect(() => {
 
     // deboucing fetch funciton to reduce number of API calls while seaching
-    debouncedFetch(dispatch, currentPage, searchedTerm)
+    debouncedFetch(dispatch, currentPage, searchedTerm, currentCategory, monthIndex)
 
     // Calculating total number of pages
     const numberOfPages = Math.ceil(totalItemsFound / 10);
 
     // Setting the total number of pages after checking 
-    setTotalPages(numberOfPages < 10 ? numberOfPages : 10);
+    setTotalPages(numberOfPages <= 10 ? numberOfPages : 10);
 
-  }, [dispatch, currentPage, searchedTerm, totalItemsFound]);
+  }, [dispatch, currentCategory, searchedTerm, currentPage, monthIndex, totalItemsFound ]);
 
 
   // Handle month selection
@@ -55,13 +57,16 @@ const Table = () => {
     const selectedMonthName = e.target.value;
     const selectedMonthIndex = e.target.options[e.target.selectedIndex].dataset.index;
   
+    console.log(selectedMonthName);
+    console.log(selectedMonthIndex);
+
     // Dispatch the action with the selected month information
     dispatch(setCurrentMonth({ month: selectedMonthName, monthIndex: selectedMonthIndex }));
   
   };
 
   // Handle page change
-  const handlePageClick = (e) => {
+  const handlePageClick = useCallback((e) => {
     if (e.target.value <= 1) {
       setCurrentPage(e.target.value)
       setIsPreviousDisabled(true)
@@ -79,7 +84,17 @@ const Table = () => {
       setIsPreviousDisabled(false) 
     }
     setCurrentPage(e.target.value)
-  }
+  }, [isNextDisabled, isPreviousDisabled, totalPages])
+
+
+
+  const handleSelectCategory = useCallback( (e) => {
+
+    setSelectedCategory(e.target.value)
+    dispatch(setCurrentCategory(e.target.value))
+
+  }, [dispatch])
+
 
   // Handling if the data is loading
   if (isLoading) {
@@ -117,33 +132,57 @@ const Table = () => {
         />
       </div>
 
-      {/* Month Selection */}
-      <div>
-        <select 
-        value={monthData[monthIndex-1].month}
-        onChange={handleSelectedMonth}
-        name="month" id="month" className="border outline-none py-2 px-2 rounded-lg cursor-pointer bg-slate-200">
+      <div className="flex items-center justify-center gap-2">
+        {/* Category Selection */}
+        <div>
+          <select 
+          value={currentCategory}
+          onChange={handleSelectCategory}
+          name="month" id="month" className="border outline-none py-2 px-2 rounded-lg cursor-pointer bg-slate-200">
+            <option key={'defaultOption'} value={''}>Select Category</option>
 
-          {
-            monthData.map(({ monthIndex, month }, index) => {
-              return (
-                <option key={index} value={month} data-index={monthIndex}
-                >
-                  {month}
-                </option>
-              )
-            })
-          }
-        </select>
+            {
+              categoryData.map((category) => {
+                return (
+                  <option key={nanoid()} value={category} 
+                  >
+                    {category}
+                  </option>
+                )
+              })
+            }
+          </select>
+        </div>
+
+        {/* Month Selection */}
+        <div>
+          <select 
+          value={month}
+          onChange={handleSelectedMonth}
+          name="month" id="month" className="border outline-none py-2 px-2 rounded-lg cursor-pointer bg-slate-200">
+            <option key={'defaultOption'} value={0} data-index={0}>Select Month</option>
+            {
+              monthData.map(({ monthIndex, month }, index) => {
+                return (
+                  <option key={index} value={month} data-index={monthIndex}
+                  >
+                    {month}
+                  </option>
+                )
+              })
+            }
+          </select>
+        </div>
       </div>
+
     </div>
 
     {
       // Display message if no data found
           filteredData &&
           filteredData.length === 0 ? (
-            <div className="w-full h-full flex items-center justify-center">
-              <p>No data found</p>
+            <div className="w-full h-full flex items-center justify-center text-white">
+              <p>No data found, try something else</p>
             </div>
       )
       :
@@ -174,12 +213,14 @@ const Table = () => {
               <tbody className="text-slate-200 p-4">
 
                 {
-                  filteredData?.length === 0 ?
+                  filteredData?.length == 0 ?
                   
                   // Display a message if no data is found
-                  <div className="flex items-center justify-center w-full mt-10">
-                    <p className="md:text-xl text-md font-semibold text-slate-500">No data found, Try searching for something else...</p>
-                  </div>
+                    (
+                      <div>
+                        No data found...
+                      </div>
+                    )
 
                   :
 
@@ -215,6 +256,8 @@ const Table = () => {
     }
 
     {/* Pagination */}
+    {
+      filteredData?.length !== 0 && 
     <div className="w-full my-20 px-2">
       <ul className="flex justify-center gap-5 py-2 px-2 bg-slate-500 rounded-2xl">
 
@@ -247,7 +290,7 @@ const Table = () => {
             // Disable next button if currentPage is totalPages
             !isNextDisabled && (
               <li 
-              className={`rounded-full md:px-4 px-2 active:translate-y-1 duration-300 hover:bg-gray-600 cursor-pointer font-bold text-slate-200`}
+              className={`rounded-full pt-2 md:px-4 px-2 active:translate-y-1 duration-300 hover:bg-gray-600 cursor-pointer font-bold text-slate-200`}
               onClick={handlePageClick}
               value={currentPage + 1}
               >  
@@ -257,7 +300,7 @@ const Table = () => {
           }
       </ul>
     </div>
-
+    }
   </div>
 )
 }

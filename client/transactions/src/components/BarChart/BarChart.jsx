@@ -12,7 +12,7 @@ const BarChart = () => {
 
   // Redux setup
   const dispatch = useDispatch();
-  const { monthIndex, month } = useSelector((state) => state.currentMonth.currentMonth);
+  const { monthIndex, month } = useSelector((state) => state.currentData.currentMonth);
   const [screenWidth, setScreenWidth] = useState(window.innerWidth);
   const barchartData = useSelector(state => state.chartData);
   const { chartData, isLoading, error } = barchartData || {};

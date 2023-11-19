@@ -2,7 +2,14 @@ const Transaction = require('../models/transactionsModel');
 
 async function handleSearchResults(req, res) {
     try {
-        const { page, search } = req.query;
+        const { page, search, currentCatergory, currentMonth } = req.body;
+
+        console.log('inside api');
+        console.log(page);
+        console.log(search);
+        console.log(currentCatergory);
+        console.log(currentMonth)
+
 
         // Define the number of items per page
         const itemsPerPage = 10;
@@ -13,38 +20,62 @@ async function handleSearchResults(req, res) {
         // Create a regular expression for case-insensitive search
         const regex = new RegExp(search, 'i');
 
-        // Use $or to match any of the specified conditions
-        let query;
-        if (search) {
-            query = {
-                $or: [
-                    { title: { $regex: regex } },
-                    { description: { $regex: regex } },
-                    { productPrice: { $eq: Number(search) } },
-                ]
-            };
-        } else {
-            query = {};
+
+        // Aggregation pipeline
+        const pipeline = [];
+
+        // if month is there
+        if (currentMonth !== 0) {
+            pipeline.push({
+                $match: {
+                    $expr: {
+                        $eq: [{ $month: "$dateOfSale" }, +currentMonth]
+                    }
+                }
+            });
         }
+
+        // if category is there
+        if (currentCatergory !== 'all') {
+            pipeline.push({
+                $match: {
+                    category: currentCatergory
+                }
+            });
+        }
+
+        // Use $or to match any of the specified conditions
+        if (search) {
+            const regex = new RegExp(search, 'i');
+            pipeline.push({
+                $match: {
+                    $or: [
+                        { title: { $regex: regex } },
+                        { description: { $regex: regex } },
+                        { productPrice: { $eq: Number(search) } },
+                    ]
+                }
+            });
+        }
+
+        let newPipeline = [...pipeline]
+
+        newPipeline.push({
+            $count: 'totalItemsFound'
+        })
+
+        let totalItemsFound = await Transaction.aggregate(newPipeline);
+
+        totalItemsFound = totalItemsFound[0]?.totalItemsFound || 0;
+
 
         // Apply skip and limit separately
-        let filteredData;
-        if (search) {
-            // If search term is provided, apply the search query
-            filteredData = await Transaction.find(query)
-                .skip(skip)
-                .limit(itemsPerPage)
-                .exec();
-        } else {
-            // If no search term is provided, return the first 10 results from the entire database
-            filteredData = await Transaction.find({})
-                .skip(skip)
-                .limit(itemsPerPage)
-                .exec();
-        }
+        // If search term is provided, apply the search query
+        let filteredData = await Transaction.aggregate(pipeline)
+            .skip(skip)
+            .limit(itemsPerPage)
+            .exec();
 
-        // Get the total count of items found with the search query
-        const totalItemsFound = await Transaction.countDocuments(query);
 
         res.json({ totalItemsFound, filteredData });
     } catch (error) {

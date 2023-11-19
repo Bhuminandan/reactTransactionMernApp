@@ -8,9 +8,9 @@ const router = express.Router();
 const handleSearchResults = require('../controllers/tableDataController').handleSearchResults;
 const handleGetStistics = require('../controllers/statisticsDataController').handleGetStistics;
 const handleGetChartData = require('../controllers/chartDataController').handleGetChartData;
+const practiceDataController = require('../controllers/practiceDataController');
 
 // Import the transactions model and controller
-const Transaction = require('../models/transactionsModel');
 const transactionsController = require('../controllers/transactionsController');
 const { pieChartDataController } = require('../controllers/pieChartDataController');
 
@@ -21,7 +21,7 @@ router.get('/', async (req, res) => {
 });
 
 // API to handle search and initial render
-router.get('/find', handleSearchResults);
+router.post('/find', handleSearchResults);
 
 // API for getting statistics
 router.get('/statistics', handleGetStistics);
@@ -31,6 +31,9 @@ router.get('/barchart', handleGetChartData);
 
 // API to handle pie chart data
 router.get('/piechart', pieChartDataController);
+
+// API for practicing queries
+router.post('/practicing', practiceDataController);
 
 // Export the router
 module.exports = router;

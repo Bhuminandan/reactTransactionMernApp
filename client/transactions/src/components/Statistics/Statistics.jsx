@@ -9,7 +9,7 @@ const Statistics = () => {
 
   // Redux setup
   const dispatch = useDispatch();
-  const { monthIndex, month } = useSelector((state) => state.currentMonth.currentMonth);
+  const { monthIndex, month } = useSelector((state) => state.currentData.currentMonth);
   const statisSticsObj = useSelector((state) => state.statistics);
   const { isLoading, error, statisStics } = statisSticsObj || {};
   const { totalSoldItems, totalNotSoldItems, totalSaleAmount } = statisStics || {};

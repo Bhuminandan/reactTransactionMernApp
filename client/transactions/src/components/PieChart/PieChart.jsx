@@ -9,7 +9,7 @@ const PieChart = () => {
 
   const dispatch = useDispatch();
 
-  const { monthIndex, month } = useSelector((state) => state.currentMonth.currentMonth);
+  const { monthIndex, month } = useSelector((state) => state.currentData.currentMonth);
   const pieChartDataObj = useSelector(state => state.pieChartData);
   const { chartData, isLoading, error } = pieChartDataObj || {};
 

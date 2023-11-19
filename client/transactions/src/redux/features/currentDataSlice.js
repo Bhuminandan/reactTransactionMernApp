@@ -2,22 +2,29 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 // Create a Redux slice for the current month
-export const currentMonthSlice = createSlice({
-    name: 'currentMonth',
+export const currentDataSlice = createSlice({
+    name: 'currentData',
     initialState: {
         currentMonth: {
-            monthIndex: 1,   // Initial month index
+            monthIndex: 0,   // Initial month index
             month: 'january'  // Initial month name
+        },
+        currentCategory: {
+            cureentCatergory: 'all'
         }
     },
     reducers: {
         // Reducer function to set the current month based on the provided payload
         setCurrentMonth: (state, action) => {
             state.currentMonth = action.payload;
+        },
+        setCurrentCategory: (state, action) => {
+            state.currentCategory = action.payload
         }
+
     }
 });
 
 // Export the action creator and the reducer
-export const { setCurrentMonth } = currentMonthSlice.actions;
-export default currentMonthSlice.reducer;
+export const { setCurrentMonth, setCurrentCategory } = currentDataSlice.actions;
+export default currentDataSlice.reducer;
